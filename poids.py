@@ -1,14 +1,12 @@
 class Poids(object):
 
-    def __init__(self):
-        self.poid = {}
+    def __init__(self, couche):
+        self.couche = {}
 
-    def ajoutePoids(self, source, destination, weight):
+    def ajoutePoids(self, source, poids):
         print(source)
         source = str(source)
-        destination = str(destination)
-        coord = source + "," + destination
-        poid.weight[coord] = weight
+        self.poids[coord] = weight
         print(weight)
 
         
