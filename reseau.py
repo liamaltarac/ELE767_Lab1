@@ -97,8 +97,27 @@ class ReseauNeuronal(object):
             for (j,poid) in enumerate(poidsDeUnNeurone):
                 self.couches[couche].neurones[i].setPoids(j,poid)
 
-        def setBias(self, couche, neurones, bias):
-            pass
+    def setSeuils(self, couche, seuils):
+
+        '''
+        setSeuils(couche, seuils)
+
+        Specifier les seuils d'une couche d'un RN.
+
+        Parametres
+        ----------
+        couche: int
+
+        seuils : list
+                Liste contenant les seuils de chaque neurones de la couche
+                Ex.: seuils = [1,2,3,4,5]  --> 5 neurones avec 5 seuils
+
+        '''
+
+        if type(seuils) is not list:
+            seuils = [seuils]
+        for neurone,seuil in enumerate(seuils):
+            self.couches[couche].neurones[neurone].setSeuil(seuil)
 
 
     def sauvegarder(self):
@@ -107,18 +126,16 @@ class ReseauNeuronal(object):
     def ouvrirReseauExistant(self, fichier):
         pass
     
-    def demarrerEntrainement(self):
-        pass
 
 if __name__ == "__main__":
     
+    #Exemple du cours
     mlp = ReseauNeuronal(numEntrees=2, numSorties=1, neuronesParCC = [2])
     mlp.setPoids(0, [0,1], [[3,6],[4,5]])
     mlp.setPoids(1, [0], [2,4])
 
-    mlp.couches[0].neurones[0].setSeuil(1)
-    mlp.couches[0].neurones[1].setSeuil(0)
-    mlp.couches[1].neurones[0].setSeuil(-3.92)
+    mlp.setSeuils(0, [1,0])
+    mlp.setSeuils(1, -3.92)
 
     mlp.entraine([1,0], [1])
 
