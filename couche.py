@@ -11,6 +11,7 @@ class Couche(object):
         self.entrees = []
         self.sorties = []
         self.coucheSortie = coucheSortie
+        self.numEntrees = numEntrees
 
     def setEntrees(self, valeurs):
         self.entrees = valeurs
@@ -26,6 +27,11 @@ class Couche(object):
             for (i,sortieDesire) in enumerate(sortiesDesire):
                 self.neurones[i].sortieDesire = sortieDesire
 
+    def calculSorties(self):
+        for neurone in self.neurones:
+            neurone.calculSortie()
+        self.updateSortie()  
+
     def activerNeurons(self):
         for neurone in self.neurones:
             neurone.calculActivation()
@@ -39,9 +45,16 @@ class Couche(object):
             return
         for num, neurone in enumerate(self.neurones):
 
-            listePoids = [n.getPoids(numEntree = num) for n in prochaineCouche.neurones]
-            listeDeltas = [n.delta for n in prochaineCouche.neurones]
-            neurone.calculSignalErreur(poidsNext = listePoids, deltasNext = listeDeltas)
+            try:
+                listePoids = [n.getPoids(numEntree = num) for n in prochaineCouche.neurones]
+                listeDeltas = [n.delta for n in prochaineCouche.neurones]
+                neurone.calculSignalErreur(poidsNext = listePoids, deltasNext = listeDeltas)
+            except:
+                print("nb neurones", len(self.neurones))
+                print("nb neurones prochaine couche", len(prochaineCouche.neurones))
+
+                raise("")
+
     
     def correction(self):
         for neurone in self.neurones:
@@ -96,15 +109,4 @@ if __name__ == "__main__":
     print(outputLayer.neurones[0].getPoids())
 
     #print(outputLayer.neurones[0].deltaPoids)
-
-
-
-
-
-
-
-
     
-   
-
-

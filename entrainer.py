@@ -1,0 +1,2 @@
+class entrainement(object):
+    pass
