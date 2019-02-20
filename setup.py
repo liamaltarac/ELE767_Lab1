@@ -2,5 +2,7 @@ from distutils.core import setup
 from Cython.Build import cythonize
 
 setup(
-    ext_modules=cythonize("*.pyx"),
+    ext_modules=cythonize("couche.pyx"),
 )
+
+#Execute with  : $ python3 setup.py build_ext --inplace

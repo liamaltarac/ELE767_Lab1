@@ -34,7 +34,14 @@ class FonctionsActivation(object):
     def leakyrelu(X, derive, a=0.01):
         if derive:
             return np.where(X > 0, 1, a)
-        return np.where(X > 0, X, a*X)       
+        return np.where(X > 0, X, a*X)      
+
+    @staticmethod
+    def  sinus(X, derive):
+        if derive:
+            return np.cos(X)
+        return np.sin(X)
+
 
 
 
@@ -42,7 +49,8 @@ fonctions = {"sigmoid": FonctionsActivation.sigmoid,
              "tanh": FonctionsActivation.tanh,
               "softplus": FonctionsActivation.softplus,
               "relu": FonctionsActivation.relu,
-              "leakyrelu":FonctionsActivation.leakyrelu}
+              "leakyrelu":FonctionsActivation.leakyrelu,
+              "sinus": FonctionsActivation.sinus}
 
 class FonctionActivation(object):
 

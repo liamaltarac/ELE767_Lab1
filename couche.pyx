@@ -1,12 +1,10 @@
-from poids import Poids
 from mlp_math import FonctionActivation
-from neurone import Neurone
 import numpy as np
 
 
 class Couche(object):
 
-    def __init__(self, numEntrees, numNeurones, coucheSortie = False, eta = 0.001, fctAct = "sigmoid", poids = None):
+    def __init__(self, numEntrees, numNeurones, coucheSortie = False, eta = 0.1, fctAct = "sigmoid", poids = None):
 
         self.entrees = np.zeros(numEntrees)
         self.sorties = np.zeros(numNeurones)
@@ -27,7 +25,7 @@ class Couche(object):
 
 
         if poids == None:
-            self.poids = np.random.uniform(-1,  1, [self.numEntrees,self.numNeurones])
+            self.poids = np.random.uniform(-0.05,  0.05, [self.numEntrees,self.numNeurones])
 
     def setEntrees(self, valeurs):
         self.entrees = valeurs
