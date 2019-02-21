@@ -1,0 +1,35 @@
+event: ns : Nanoseconds
+events: ns
+summary: 10151554000
+fl=/Users/liamaltarac/Documents/ETS/2019/ELE767/ELE767_Lab1/couche.py
+fn=activerNeurons
+69 10146695000
+cfl=/Users/liamaltarac/Documents/ETS/2019/ELE767/ELE767_Lab1/mlp_math.py
+cfn=__new__
+calls=434 57
+69 3447000
+cfl=~
+cfn=<built-in method numpy.core.multiarray.zeros>
+calls=434 0
+69 1411999
+
+fl=/Users/liamaltarac/Documents/ETS/2019/ELE767/ELE767_Lab1/mlp_math.py
+fn=tanh
+15 2620000
+
+fl=/Users/liamaltarac/Documents/ETS/2019/ELE767/ELE767_Lab1/mlp_math.py
+fn=__new__
+57 826999
+cfl=/Users/liamaltarac/Documents/ETS/2019/ELE767/ELE767_Lab1/mlp_math.py
+cfn=tanh
+calls=434 15
+57 2620000
+
+fl=~
+fn=<built-in method numpy.core.multiarray.zeros>
+0 1411999
+
+fl=~
+fn=<method 'disable' of '_lsprof.Profiler' objects>
+0 111000
+

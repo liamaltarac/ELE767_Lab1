@@ -5,6 +5,7 @@ import numpy as np
 import random
 debug = True
 
+
 class MLP(object):
     
     def __init__(self, numEntrees, numSorties, fonctionActivation = "sigmoid", neuronesParCC = [20], eta = 0.1, sortiePotentielle = None, epoche = 1):        
@@ -36,27 +37,20 @@ class MLP(object):
                                 fctAct=fonctionActivation)
         self.couches.append(coucheSortie)
 
-        for i in range(self.numCC):
-            print("CC ", i)        
-            print("Nb neurones ", self.couches[i].numNeurones)
-            print("Nb entrees ", self.couches[i].numEntrees)
-            print("Nb entrees par neurone ", self.couches[i].numEntrees)
-            print("Nb poids par neurone ", (self.couches[i].getPoids()))
+        # for i in range(self.numCC):
+        #     print("CC ", i)        
+        #     print("Nb neurones ", self.couches[i].numNeurones)
+        #     print("Nb entrees ", self.couches[i].numEntrees)
+        #     print("Nb entrees par neurone ", self.couches[i].numEntrees)
+        #     print("Nb poids par neurone ", (self.couches[i].getPoids()))
 
-        print("Csortie ")
-        print("Nb neurones ", (self.couches[-1].numNeurones))
-        print("Nb entrees ", self.couches[-1].numEntrees)
-        print("Nb entrees par neurone ", self.couches[-1].numEntrees)
-        print("Nb poids par neurone ", (self.couches[-1].getPoids()))
-
+        # print("Csortie ")
+        # print("Nb neurones ", (self.couches[-1].numNeurones))
+        # print("Nb entrees ", self.couches[-1].numEntrees)
+        # print("Nb entrees par neurone ", self.couches[-1].numEntrees)
+        # print("Nb poids par neurone ", (self.couches[-1].getPoids()))
     def entraine(self, entree, sortieDesire):
         #Premieremnt, nous allons tester si les tableaux entree et sortieDesire contienent des sous tableaux
-
-        permanantEntree = entree
-        permanantSortieDesire = sortieDesire
-
-        tailleEntree = len(entree)
-        tailleSortie = len(sortieDesire)
 
         if type(entree[0]) is not list and type(entree[0]) is not np.ndarray:
             entree = [entree]
@@ -65,6 +59,13 @@ class MLP(object):
         if type(sortieDesire[0]) is not list and type(sortieDesire[0]) is not np.ndarray:
             sortieDesire = [sortieDesire]
             tailleSortie = len(sortieDesire)
+
+
+        permanantEntree = entree
+        permanantSortieDesire = sortieDesire
+
+        tailleEntree = len(entree)
+        tailleSortie = len(sortieDesire)
 
         if tailleEntree != tailleSortie:
             raise("len(entree) != len(sortieDesire) : Chaque entree doit avoir une sortie desire conrespondante ")
@@ -102,8 +103,8 @@ class MLP(object):
                     self.performance[numEpoche] += 1 
                     print("performance ", self.performance)
                     continue
-                if self.performance[numEpoche] >= 7 :
-                    return
+                #if self.performance[numEpoche] >= 7 :
+                #    return
 
                 self.couches[-1].setSortiesDesire(_sortieDesire)
                 #print("smax: ",self.softmax(self.couches[-1].getSortie()))
@@ -235,7 +236,7 @@ class MLP(object):
 if __name__ == "__main__":
     
     #Exemple du cours
-    '''mlp = MLP(numEntrees=2, numSorties=1, neuronesParCC = [2])
+    '''mlp = MLP(numEntrees=2, numSorties=1, neuronesParCC = [2],epoche=1)
     mlp.setPoids(0, np.array([[3,4],
                               [6,5]]))
     mlp.setPoids(1, np.array([2,4]))
@@ -244,12 +245,34 @@ if __name__ == "__main__":
     mlp.setSeuils(1, [-3.92])
 
     mlp.entraine([1,0], [1])
-
     print("My out ",mlp.test([1,0]))
     print("MLP Poids couche 0  ", mlp.couches[0].getPoids())
-    print("MLP Poids couch 1  ", mlp.couches[1].getPoids())'''
+    print("MLP Poids couch 1  ", mlp.couches[1].getPoids())
 
-    
+    print("MLP test sortie  ", mlp.test([1,0]))'''
+
+    #Exemple du cours #2
+    '''mlp = MLP(numEntrees=3, numSorties=2, neuronesParCC = [3],epoche=1)
+    mlp.setPoids(0, np.array([[0.1,0.2, 0.1],
+                              [0.1,0.3,0.5],
+                              [0.2, 0.1, 0.05]]))
+    mlp.setPoids(1, np.array([[0.3, 0.1],
+                             [0.4, 0.3],
+                             [0.1, 0.2]]))
+
+    mlp.setSeuils(0, [1,0,1])
+    mlp.setSeuils(1, [1,0])
+
+    mlp.entraine([1,2,3], [3,2])
+    #mlp.entraine([1,2,3], [3,2])
+
+
+
+    print("My out ",mlp.test([1,2,3]))
+    print("MLP Poids couche 0  ", mlp.couches[0].deltaPoids)
+    print("MLP Poids couch 1  ", mlp.couches[1].deltaPoids)
+
+    print("MLP test sortie  ", mlp.test([1,0]))'''
     
     #todo: choisir l'entree de l'entainement d'une facon aleatore
     #todo: test le mlp avec data train
@@ -282,8 +305,8 @@ if __name__ == "__main__":
                     '9': [1,0,0,1]}'''
 
     fct = "tanh"
-    mlp = MLP(numEntrees = 1560, numSorties = 10, neuronesParCC = [100,20],
-              sortiePotentielle=sortiesDesire, fonctionActivation=fct , epoche= 30, eta=0.025)
+    mlp = MLP(numEntrees = 1560, numSorties = 10, neuronesParCC = [50],
+              sortiePotentielle=sortiesDesire, fonctionActivation=fct , epoche= 5, eta=0.1)
 
     f = open("data/data_train.txt", 'r')
     data = f.read()
@@ -303,7 +326,7 @@ if __name__ == "__main__":
     #entrees = [float(entrees[i]) for i in range(len(entrees[j])) for j in range(len(entrees))]
     print("nb entrees = ", len(entrees))
     
-    mlp.entraine(entrees[0:10], sorties[0:10])
+    mlp.entraine(entrees, sorties)
 
     print("Training Done")
 

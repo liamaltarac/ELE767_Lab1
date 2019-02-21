@@ -1,12 +1,12 @@
 from mlp_math import FonctionActivation
 import numpy as np
-
-
+#from profilestats import profile
 class Couche(object):
 
     def __init__(self, numEntrees, numNeurones, coucheSortie = False, eta = 0.1, fctAct = "sigmoid", poids = None):
 
         self.entrees = np.zeros(numEntrees)
+        self.numEntrees = numEntrees
         self.sorties = np.zeros(numNeurones)
         self.coucheSortie = coucheSortie
         self.numEntrees = numEntrees
@@ -22,6 +22,8 @@ class Couche(object):
 
 
         self.tauxApprentissage = eta
+
+        
 
 
         if poids == None:
@@ -42,6 +44,7 @@ class Couche(object):
     def setSortiesDesire(self, sortiesDesire):
 
         self.sortiesDesire = sortiesDesire
+
 
     def calculSorties(self):
         i = np.zeros(self.numNeurones)
@@ -71,18 +74,25 @@ class Couche(object):
         #print("poids de cettec couche", self.poids)
 
         for neurone in range(self.numNeurones):
-            for num_entree, entree in enumerate(self.entrees):
-                #print("i ", i)
-                if self.numNeurones > 1:
-                    #print("p", self.poids)
-                    poid = self.poids[num_entree, neurone]
+            if self.numNeurones > 1:
+                #print("p", self.poids)
+                #print("neurone ",neurone)
+                poid = self.poids[:, neurone]
+            else:
+                #print("onluy one layer")
+                poid = self.poids
+                #print("this poid is", poid) 
+            self.i[neurone] =  np.sum(self.entrees * poid)              
+            '''for num_entree, entree in enumerate(self.entrees):
+                #print(num_entree)
+
                     
                 else:
                     #print("onluy one layer")
                     poid = self.poids[num_entree]
                     #print("this poid is", poid)
                 self.i[neurone] += (entree * poid )
-                #print(entree ,poid)
+                #print(entree ,poid)'''
         #print(self.seuils)
         #print("i pre", self.i)
         self.i += self.seuils
@@ -135,12 +145,20 @@ class Couche(object):
 
                 raise("")'''
 
-    
     def correction(self):
 
-        self.deltaPoids = np.zeros(self.poids.shape)
+        self.deltaPoids =  np.empty((0, self.numEntrees), float)
+
+        if self.numNeurones <= 1:
+            #print("delat size", self.deltaPoids)
+            self.deltaPoids = self.tauxApprentissage * self.delta * self.entrees
+        else:
+            #print("delat calculee", self.tauxApprentissage * self.delta * self.entrees[entree])
+            #val = self.tauxApprentissage * self.delta * self.entrees
+            self.deltaPoids = np.tile(self.entrees, (self.numNeurones,1)).T * self.delta * self.tauxApprentissage
+            #self.deltaPoids = np.append(self.deltaPoids , [self.tauxApprentissage * self.delta * self.entrees], axis=0)
         #print("Shape poids : ", self.poids.shape)
-        for entree in range(self.numEntrees):
+        '''for entree in range(self.numEntrees):
             #try:
             if self.numNeurones <= 1:
                 #print("delat size", self.deltaPoids)
@@ -152,11 +170,12 @@ class Couche(object):
             #except Exception as e:
                 #print(e)
                 #print(len(self.__entrees))
-                #print(self.tauxApprentissage * self.delta * self.__entrees[i])
+                #print(self.tauxApprentissage * self.delta * self.__entrees[i]) '''
 
         '''for neurone in self.neurones:
             neurone.correction()'''
-    
+
+    #@profile(print_stats = 10)   
     def actualisation(self):
         '''for neurone in self.neurones:
             neurone.actualisation()   '''

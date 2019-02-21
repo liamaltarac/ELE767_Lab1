@@ -1,6 +1,6 @@
 
 import numpy as np
-
+from profilestats import profile
 
 class FonctionsActivation(object):
 
@@ -53,7 +53,7 @@ fonctions = {"sigmoid": FonctionsActivation.sigmoid,
               "sinus": FonctionsActivation.sinus}
 
 class FonctionActivation(object):
-
+    #@profile(print_stats = 10)
     def __new__(self, X, fct, derive=False):
         return fonctions[fct](X, derive)
 
