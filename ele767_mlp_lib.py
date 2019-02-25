@@ -71,7 +71,10 @@ class MLP(object):
             raise("len(entree) != len(sortieDesire) : Chaque entree doit avoir une sortie desire conrespondante ")
         for numEpoche , epoche in enumerate(range(self.epoche)): 
             print("epoche " ,numEpoche)
+
+            #print("ALL OUT: ", sortieDesire)
             entree = permanantEntree 
+            
             sortieDesire = permanantSortieDesire 
 
             
@@ -80,8 +83,10 @@ class MLP(object):
                 index = random.randint(0,len(list(entree))-1)
                 _entree = entree[index]
                 _sortieDesire = sortieDesire[index]
-                np.delete(entree, index)
-                np.delete(sortieDesire,index)
+                entree = np.delete(entree, index,0)
+                sortieDesire = np.delete(sortieDesire,index,0)
+                #print("Sortie desirees", sortieDesire)
+
 
                 if self.numEntrees != len(_entree) or self.numSorties != len(_sortieDesire):
                     print( len(_entree))
@@ -90,7 +95,7 @@ class MLP(object):
                 #Les neurones de la premiere couche cache vont prendre les entree du MLP comme entrees 
                 #Etape 1 : Activation des Neurons
                 #print("Activation de neurones")
-                x = entree[i]
+                x = _entree
 
 
                 for (j,couche) in enumerate(self.couches):
@@ -252,7 +257,7 @@ if __name__ == "__main__":
     print("MLP test sortie  ", mlp.test([1,0]))'''
 
     #Exemple du cours #2
-    '''mlp = MLP(numEntrees=3, numSorties=2, neuronesParCC = [3],epoche=1)
+    '''mlp = MLP(numEntrees=3, numSorties=2, neuronesParCC = [3],epoche=2)
     mlp.setPoids(0, np.array([[0.1,0.2, 0.1],
                               [0.1,0.3,0.5],
                               [0.2, 0.1, 0.05]]))
@@ -269,8 +274,8 @@ if __name__ == "__main__":
 
 
     print("My out ",mlp.test([1,2,3]))
-    print("MLP Poids couche 0  ", mlp.couches[0].deltaPoids)
-    print("MLP Poids couch 1  ", mlp.couches[1].deltaPoids)
+    print("MLP Poids couche 0  ", mlp.couches[0].getPoids())
+    print("MLP Poids couch 1  ", mlp.couches[1].getPoids())
 
     print("MLP test sortie  ", mlp.test([1,0]))'''
     
@@ -304,7 +309,7 @@ if __name__ == "__main__":
                     '8': [1,0,0,0],
                     '9': [1,0,0,1]}'''
 
-    fct = "tanh"
+    fct = "sigmoid"
     mlp = MLP(numEntrees = 1560, numSorties = 10, neuronesParCC = [50],
               sortiePotentielle=sortiesDesire, fonctionActivation=fct , epoche= 5, eta=0.1)
 
@@ -312,7 +317,7 @@ if __name__ == "__main__":
     data = f.read()
     datas = data.split("\n")
     nb_data = len(datas)
-    sorties = [sortiesDesire[datas[i].split(":")[0]] for i in range(nb_data)]
+    sorties = np.array([sortiesDesire[datas[i].split(":")[0]] for i in range(nb_data)])
     entrees = [(datas[i].split(":")[1]).split(" ") for i in range(nb_data)]
     entrees = [list(filter(None, entree)) for entree in entrees]
     entrees = np.array(entrees)
