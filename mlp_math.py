@@ -39,8 +39,8 @@ class FonctionsActivation(object):
     @staticmethod
     def  sinus(X, derive):
         if derive:
-            return np.cos(X)
-        return np.sin(X)
+            return np.cos(X * np.pi / 180., dtype=np.double)
+        return np.sin(X* np.pi / 180., dtype=np.double)
 
 
 

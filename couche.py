@@ -3,7 +3,8 @@ import numpy as np
 #from profilestats import profile
 class Couche(object):
 
-    def __init__(self, numEntrees, numNeurones, coucheSortie = False, eta = 0.1, fctAct = "sigmoid", poids = None):
+    def __init__(self, numEntrees, numNeurones, coucheSortie = False, eta = 0.1,
+                 fctAct = "sigmoid", poids = None):
 
         self.entrees = np.zeros(numEntrees)
         self.numEntrees = numEntrees
@@ -27,7 +28,7 @@ class Couche(object):
 
 
         if poids == None:
-            self.poids = np.random.uniform(-0.05,  0.05, [self.numEntrees,self.numNeurones])
+            self.poids = np.random.uniform(-0.1,  0.1, [self.numEntrees,self.numNeurones])
 
     def setEntrees(self, valeurs):
         self.entrees = valeurs
@@ -50,22 +51,23 @@ class Couche(object):
         i = np.zeros(self.numNeurones)
         #print("p ", self.poids)
         #("num neuron", self.numNeurones)
+        #print("poids de cettec couche", self.poids)
+
         for neurone in range(self.numNeurones):
-            #print("n ", neurone)
-            for num_entree,entree in enumerate(self.entrees):
-                #print("i ", i)
-                if self.numNeurones > 1:
-                    #print("p", self.poids)
-                    poid = self.poids[num_entree, neurone]
-                else:
-                    poid = self.poids[num_entree]
-                i[neurone] += (entree * poid )
+            if self.numNeurones > 1:
+                #print("p", self.poids)
+                #print("neurone ",neurone)
+                poid = self.poids[:, neurone]
+            else:
+                #print("onluy one layer")
+                poid = self.poids
+                #print("this poid is", poid) 
+            i[neurone] =  np.sum(self.entrees * poid)              
+        #print(self.seuils)
+        #print("i pre", self.i)
         i += self.seuils
-
-
+        #print("i calced", self.i)
         self.sorties = FonctionActivation(i, self.fctAct)
-        #print("activation out ", self.sorties)
-        #return self.sorties
 
     def activerNeurons(self):
         self.i = np.zeros(self.numNeurones)

@@ -1,19 +1,19 @@
-from reseau import ReseauNeuronal
+from ele767_mlp_lib import MLP
 import numpy as np
 
-class ReconParole(object):
+class ReconnaissanceParole(object):
 
-    def __init__(self, numEntrees, numSorties,
-                entreesPossible, sortiesDesires = None, 
-                neuronesParCC = [100,100,100], eta = 0.1):
+    def __init__(self, methode = "MLP"):
+        self.methode = methode
+        self.rn = MLP()
 
-        rn = ReseauNeuronal(numEntrees=numEntrees, numSorties = numSorties, neuronesParCC = neuronesParCC, eta = eta)
 
     def entraine(self):
         pass
 
     def reconaitre(self, input):
         pass
+
 
     def getAccuracy(self):
         pass
