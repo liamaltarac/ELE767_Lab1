@@ -1,7 +1,7 @@
 import os
 
 
-def getData(filename):
+def getData(filename, nbentree):
 
     script_dir = os.path.dirname(__file__)  # Repertoire absolue du fichier
     rel_path = "data/" + filename  # Repertoire relative du fichier voulu
@@ -12,19 +12,15 @@ def getData(filename):
     i = 0
     datalist = []
     for line in lines:
-        #j = 0
         dataline = line.split()
         datalist.append([])
-        for word in dataline:
-        #for j in xrange(2):
+        for word in range(nbentree*26 + 1):
             datalist[i].append(word)
-            #j += 1
-        #liste[i].append(data[0])
         i += 1
     return datalist
 
 def __main__():
-    liste = getData("data_train.txt")
+    liste = getData("data_train.txt",60)
 
 
 __main__()
