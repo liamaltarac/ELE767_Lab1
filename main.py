@@ -1,7 +1,0 @@
-class Main(object):
-    pass
-
-
-
-
-

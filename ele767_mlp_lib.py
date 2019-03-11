@@ -26,7 +26,10 @@ class MLP(object):
                 VCin = None, VCout = None, condtionArret = None):    
 
         self.numEntrees = numEntrees
+        print("# entrees ", self.numEntrees)
         self.numSorties = numSorties
+        print("# Sorties ", self.numSorties)
+
         self.fonctionActivation = fonctionActivation
         self.numCC = len(neuronesParCC)
         self.neuronesParCC = neuronesParCC
@@ -123,9 +126,7 @@ class MLP(object):
                 #print("Sortie desirees", sortieDesire)
 
 
-                if self.numEntrees != len(_entree) or self.numSorties != len(_sortieDesire):
-                    print( len(_entree))
-                    raise("self.numEntrees != len(entree) or self.numSorties != len(sortieDesire)")
+
                 #print("Input Data ", i+1)
                 #Les neurones de la premiere couche cache vont prendre les entree du MLP comme entrees 
                 #Etape 1 : Activation des Neurons
@@ -140,18 +141,18 @@ class MLP(object):
                     x = np.array(couche.sorties)
                     #print(x)
                     #print(couche.getPoids())
-                
-                '''if (self.softmax(self.couches[-1].getSortie()) == _sortieDesire).all():
+                #print(len(self.softmax(self.couches[-1].getSortie())))
+                #print(_sortieDesire)
+                if (self.softmax(self.couches[-1].getSortie()) == _sortieDesire).all():
                     self.performance[numEpoche] += 1 
                     print("performance ", self.performance)
-                    continue'''
+                    continue
                 #if self.performance[numEpoche] >= 7 :
                 #    return
 
                 self.couches[-1].setSortiesDesire(_sortieDesire)
                 #print("smax: ",self.softmax(self.couches[-1].getSortie()))
                 #print("sort des: ",sortieDesire[i])
-                #print("i", i)
 
                 #print(self.couches[-1].getSortie())
 
@@ -323,9 +324,10 @@ def getES(fichier, sortiesDesire):
 
     return entrees, sorties
 
-    
 
 if __name__ == "__main__":
+
+    #TODO : Multiple Layers, interface, 
     
     #Exemple du cours
     '''mlp = MLP(numEntrees=2, numSorties=1, neuronesParCC = [2],epoche=1)
@@ -430,7 +432,7 @@ if __name__ == "__main__":
 
     fct = "sigmoid"
     
-    mlp = MLP(numEntrees = 1560, numSorties = 10, neuronesParCC = [5,15],
+    mlp = MLP(numEntrees = 1560, numSorties = 10, neuronesParCC = [50],
               sortiePotentielle=sortiesDesire, fonctionActivation=fct , 
               epoche= 4, eta=0.1, VCin = VCin, VCout = VCout, adaptive=False)
 

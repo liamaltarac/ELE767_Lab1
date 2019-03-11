@@ -1,2 +1,0 @@
-class entrainement(object):
-    pass
