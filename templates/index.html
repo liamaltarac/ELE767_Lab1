@@ -171,13 +171,12 @@
 												<div class="modal-header">
 														<h5 class="modal-title">Sorties Potentiels</h5>
 
-													<button type="button" class="close" data-dismiss="modal">&times;</button>
 												</div>
 												<div class="modal-body">
 													<textarea id = "sortiesDes" class="col-sm-12"> </textarea>
 												</div>
 												<div class="modal-footer">
-													<button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+													<button type="button" class="btn btn-default" data-dismiss="modal">Sauvegarder</button>
 												</div>
 											</div>
 											</div>
@@ -185,7 +184,31 @@
 									</div>
 							</div>
 
-									<button type="submit" class="btn btn-primary btn-xl">Entraine</button>
+							<div class="form-row align-items-center">
+							<div class="col-auto">
+									<div class="form-check mb-2 pr-2 " style = " border-right: 1px dashed #333;">
+
+										<input class="form-check-input" type="checkbox" id="etaAdaptif" name="etaAdaptif">
+										<label class="form-check-label" for="etaAdaptif" >
+												&#x3B7; adaptif 
+											</label>
+									</div>
+								</div>
+								<div class="col-auto">
+										<div class="form-check mb-2 pr-2 " style = " border-right: 1px dashed #333;">
+											<input class="form-check-input" type="checkbox" id="ajoutBruit" name = "ajoutBruit">
+											<label class="form-check-label" for="ajoutBruit" >
+													Ajout de bruit
+												</label>
+										</div>
+									</div>
+								<div class="col-auto " style="text-align:end">
+										<button id = "trainBtn" type="submit" class="btn btn-primary ">Entraine</button>
+								</div>
+								</div>
+
+
+
 									<!--<button type="submit" class="btn btn btn-danger btn-xl">Stop</button>-->
 
 						</form>
@@ -205,7 +228,7 @@
 								</div>
 							</div>
 							<div class="col-xs-12" style="text-align:end">
-								<button type="submit" class="btn btn-primary btn-xl">Test</button>
+								<button type="submit" class="btn btn-primary ">Test</button>
 							</div>
 						</form>
 					</div>
@@ -215,9 +238,10 @@
 
 			<div id="flexBoxRight" class="col-xs-6 col-md-6">
 				<div id="jxgbox" class="jxgbox col-xs-12   " style="height: 100px"> </div> 
-				<div id=messageBox class="col-xs-12" style="height: 20%">
-						<textarea class="col-xs-12 col-md-12 " style="height: 100%;">
+				<div id="messageBoxArea" class="col-xs-12" style="height: 20%">
+						<textarea id = "messageBox"  class="col-xs-12 col-md-12 " style="height: 100%; resize: none">
 									</textarea>
+
 				</div>
 
 				<script>
@@ -242,7 +266,7 @@
 						testHeight = $('#test').height();
 						console.log(testHeight - trainElementPaddingB);
 						
-						$("#messageBox").height(testHeight - testElementPaddingB);
+						$("#messageBoxArea").height(testHeight - testElementPaddingB);
 
 
 					});
@@ -309,24 +333,52 @@
 					});
 
 
+							var data_entrain;
+							var data_vc ;
+							var eta;
+							var n_p_cc;
+							var fct ;
+							var db;
+							var nb_epoche;
+							var s_des ;
+
+							var board;
+
+							var testPerf = [];
+							var vcPerf = []
+							var epocheArray = [];
+						
+						var ajoutBruit;
 					var epocheCounter = 0;
 
-					$(function TrainMLP(){
-							 data_entrain = document.getElementById('dataTrain').value;
-							data_vc = document.getElementById('dataVC').value;
-							eta= document.getElementById('eta').value;
-							n_p_cc =  document.getElementById('n_p_cc').value;
-							fct = document.getElementById('fct').value;
-							db = document.getElementById('db').value;
-							nb_epoche = document.getElementById('nb_epoche').value;
-							s_des = document.getElementById("sortiesDes").value;
+					function TrainMLP(){
 
-							var form = $('formTrain');
+
+							var form = $('#formTrain')[0];
 							console.log(form);
-
+						
 							var formData = new FormData(form);
 
 							formData.append("sortiesDes",s_des);
+
+							formData.delete("ajoutBruit");
+							if(document.getElementById("ajoutBruit").checked){
+								formData.append("ajoutBruit","True");
+							}
+							else{
+								formData.append("ajoutBruit","False");
+							}
+
+
+							formData.delete("etaAdaptif");
+							if(document.getElementById("etaAdaptif").checked){
+								formData.append("etaAdaptif","True");
+							}
+							else{
+								formData.append("etaAdaptif","False");
+							}
+
+							var start_time = new Date().getTime();
 
 
 										$.ajax({
@@ -335,22 +387,79 @@
 															data: formData,
 															contentType: false, 
 															processData: false,
+
 															success: function (response) {
 																console.log(response)
+																var request_time = (new Date().getTime() - start_time) / 1000;
+																responseDict = JSON.parse(response);
+																testPerf.push(parseFloat(responseDict["trainDataPerf"]));
+																vcPerf.push(parseFloat(responseDict["vcDataPerf"]));
+																status = responseDict["status"]
+																eta = responseDict["eta"]
+																if (status == "OK"){
+																	document.getElementById("messageBox").value += "\rEpoche " + epocheCounter + "&#x3B7; = " + eta + " : (" + request_time + "sec)";
+																	document.getElementById("messageBox").value += "\n\tPerformance avec donées de test : " +  testPerf[testPerf.length - 1]
+																	document.getElementById("messageBox").value += "\n\tPerformance avec donées de VC   : " +  vcPerf[vcPerf.length - 1] + "\n"
+																	var textarea = document.getElementById('messageBox');
+																	textarea.scrollTop = textarea.scrollHeight;
+
+																}
+
+																Plot(nb_epoche);
 															}
 											});
-						});
+						};
 
 
 						$('form').on('submit', function (event) {
- 
+
+							
+
 							event.preventDefault();
 
-							TrainMLP();
+							document.getElementById("trainBtn").disabled = true;
 
+							data_entrain = document.getElementById('dataTrain').value;
+							data_vc = document.getElementById('dataVC').value;
+							eta= document.getElementById('eta').value;
+							n_p_cc =  document.getElementById('n_p_cc').value;
+							fct = document.getElementById('fct').value;
+							db = document.getElementById('db').value;
+							nb_epoche = document.getElementById('nb_epoche').value;
+							s_des = document.getElementById("sortiesDes").value;
+							addNoise = document.getElementById("ajoutBruit").value;
+
+
+							document.getElementById("messageBox").value = " "
+							document.getElementById("messageBox").value = "Entrainement en cours ...";
+							
+						
+							board = JXG.JSXGraph.initBoard('jxgbox', {boundingbox:  [-1, 1.1, parseInt(nb_epoche), -0.1], 
+																												axis:true, grid:true, showNavigation:false , showCopyright:false });
+
+							TrainMLP();
 							});
 
+							function Plot(nb_epoche, performance){
+								console.log(epocheCounter)
+									epocheArray.push(epocheCounter);
+									console.log(testPerf)
+									console.log(epocheArray)
+  								board.create('curve', [epocheArray, testPerf], {dash:2});
+  								board.create('curve', [epocheArray, vcPerf], {dash:2});
 
+								if (epocheCounter < nb_epoche-1){
+									TrainMLP();
+									epocheCounter++;
+
+								}
+								else{
+									epocheCounter = 0;
+									testPerf = [];
+									vcPerf = [];
+									document.getElementById("trainBtn").disabled = false;
+								}
+							}
 
 
 

@@ -8,11 +8,12 @@ import numpy as np
 
 from ele767_mlp_lib import MLP
 
+
 app = Flask(__name__)
+app.mlp = None
 
 UPLOAD_FOLDER = 'UPLOAD_FOLDER'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 
 '''
 'o': [0,0,0,0,0,0,0,0,0,1],
@@ -27,7 +28,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 '9': [1,0,0,0,0,0,0,0,0,0]
 '''
 
-def getES(fichier, sortiesDesire, nb_entree):
+def getES(fichier, sortiesDesire):
     f = open(fichier, 'r')
     data = f.read()
     datas = data.split("\n")
@@ -38,9 +39,7 @@ def getES(fichier, sortiesDesire, nb_entree):
     entrees = [list(filter(None, entree)) for entree in entrees]
     entrees = np.array(entrees)
     entrees = entrees.astype(float)
-
     
-
     return entrees, sorties
 
 
@@ -48,7 +47,6 @@ def getES(fichier, sortiesDesire, nb_entree):
 def test():
 
     if request.method == "GET":
-        """Print 'Hello, world!' as the response body."""
         return render_template("index.html")
     else:
         return "GOT POST REQUETST"
@@ -82,25 +80,42 @@ def startTraining():
         db = int(request.form['db'])
         nb_epoche = int(request.form['nb_epoche'])
         sorties_desire = request.form['sortiesDes']
+        ajoutBruit = request.form['ajoutBruit']
+        etaAdaptif = request.form['etaAdaptif']
 
         sorties_desire = eval("{" + sorties_desire + "}")
 
         nb_sorties = len(list(sorties_desire.values())[0])
         nb_entrees = db * 26
+        
+        if app.mlp == None:
+            print("NEW MLP")
+            if etaAdaptif == "True":
+                etaAdaptif = True
+            else:
+                etaAdaptif = False
 
-        mlp = MLP(nb_entrees,nb_sorties, neuronesParCC = n_p_cc, eta = eta, sortiePotentielle = sorties_desire, 
-                    epoche = 1)
-        testInput, testOutput = getES(dataTrainFile, sortiesDesire=sorties_desire)
-        #print("Test In", testIn)
-        #print("Test Out", testOut)
+            app.mlp = MLP(nb_entrees,nb_sorties, neuronesParCC = n_p_cc, eta = eta, sortiePotentielle = sorties_desire, 
+                        epoche = 1, etaAdaptif=etaAdaptif)
+        trainInput, trainOutput = getES(dataTrainFile, sortiesDesire=sorties_desire)
+
+        boolAjoutBruit = False
+        if ajoutBruit == "True":
+            boolAjoutBruit = True
         status = {}
-        mlp.entraine(testInput, testOutput)
+        app.mlp.entraine(trainInput, trainOutput, boolAjoutBruit)
+        
+        if dataVCFile is not None:
+            vcIn, vcOut = getES(dataVCFile, sortiesDesire=sorties_desire)
+            _, vcPerf = app.mlp.test(vcIn, sortieDesire =  vcOut)
+            status["vcDataPerf"] = vcPerf
+
         status["status"] = "OK"
-        status["Message"] = list(mlp.performance)
+        status["trainDataPerf"] = app.mlp.performance[-1]
+        status["eta"] = app.mlp.eta
+
+
         return json.dumps(status)
-
-
-
 
 
 if __name__ == "__main__":
