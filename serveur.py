@@ -47,9 +47,12 @@ def getES(fichier, sortiesDesire):
 def test():
 
     if request.method == "GET":
+        app.mlp = None
         return render_template("index.html")
     else:
         return "GOT POST REQUETST"
+
+    
 
 @app.route('/start_training',methods=['POST'])
 def startTraining():
@@ -117,6 +120,105 @@ def startTraining():
 
         return json.dumps(status)
 
+@app.route('/open_mlp',methods=['POST'])
+def openMLP():
+    if request.method == "POST":
+        print(request.files)
+        status = {}
+        status["status"] = "OK"
+
+        try:
+            if 'mlpFile' in request.files:
+                file = request.files["mlpFile"]
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                mlpFile = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+                app.mlp = MLP(fichier_mlp=mlpFile)
+                sortiesPotentielle = ""
+                for key, val in app.mlp.sortiesPotentielle.items():
+                    print(key + ":" + str(val) + "\n")
+                    sortiesPotentielle += (key + ":" + str(val) + "\n")
+                status["sortiesPotentielle"] = sortiesPotentielle
+                print("numEntrees ", app.mlp.numEntrees )
+                status["db"] = app.mlp.numEntrees / 26
+                status["eta"] = app.mlp.eta
+                status["neuronesParCC"] = app.mlp.neuronesParCC
+            
+            print("Done" + sortiesPotentielle)
+        except Exception as e:
+            status["status"] = "ERREUR"
+            print(e)
+
+        return json.dumps(status)
+
+@app.route('/save_mlp',methods=['POST'])
+def saveMLP():
+    if request.method == "POST":
+        print(request.form)
+        fileOut = os.path.join("mlps_sauvgarde", request.form["outputFile"] + ".txt")
+        status = {}
+
+        if app.mlp is None:
+            status["status"] = "Aucun MLP ouvert"
+            return json.dumps(status)
+
+        try:
+            app.mlp.exporterMLP(fileOut)
+            status["status"] = "Fini : \n\tSauvgardé sous le nom: \n\t "+fileOut
+
+        except Exception as e:
+            print(e)    
+            status["status"] = "ERREUR"
+            
+        return json.dumps(status)
+
+
+@app.route('/test_mlp',methods=['POST'])
+def testMLP():
+    if request.method == "POST":
+        print(request.files)
+        status = {}
+
+        #Nous allons premierement prendre les fichiers d'entrainement et de validation croisé. 
+        if 'mlpTestFile' in request.files:
+            file = request.files["mlpTestFile"]
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            dataTestFile = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            if app.mlp is None:
+                status["status"] = "Aucun MLP ouvert"
+                return json.dumps(status)
+            try:
+                
+                print(dataTestFile)
+                testOut  = np.empty((0,1), int)
+                testIn , testOutDes = getES(dataTestFile, sortiesDesire=app.mlp.sortiesPotentielle)
+                #print("Test OUT:")
+                #print(testOutDes)
+                mlp_out, perf = app.mlp.test(testIn, sortieDesire = testOutDes)
+                print("MLP_OUT")
+                print(mlp_out)
+                #print(app.mlp.sortiesPotentielle)
+                mlp_out = mlp_out.astype(int)
+                sortPotInv = dict([[str(v),k] for k,v in app.mlp.sortiesPotentielle.items()])
+                #print(sortPotInv)
+                print(len(mlp_out))
+                for i in range(len(mlp_out)):
+                    print("OUTPUT", sortPotInv[str(list(mlp_out[i]))])
+                    testOut = np.append(testOut, ["Echantillon " + str(i) + " : " + sortPotInv[str(list(mlp_out[i]))]])
+                #print(testOut)
+
+                status["status"] = "Fin du test"
+                status["mlp_out"] = str(np.vstack(testOut))
+                print(perf)
+                status["perf"] = perf
+            except Exception as e:
+                status["status"] = "ERREUR"
+                print(e)
+
+ 
+    return json.dumps(status)
 
 if __name__ == "__main__":
     app.run(debug=True,  threaded=False)

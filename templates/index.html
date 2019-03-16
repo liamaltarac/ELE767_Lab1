@@ -87,14 +87,21 @@
 								<div class="col-sm-4">
 									<h3>Entrainer </h3>
 								</div>
-								<div class=" col-sm-8" style="text-align:end">
-									<a href=" #" class="pr-3">
-										<span class="fa fa-folder-open"></span>
-									</a>
 
-									<a href="#" class="pr-3">
-										<span class="fa fa-floppy-o" aria-hidden="true"></span>
-									</a>
+
+
+								<div class=" col-sm-8" style="text-align:end">
+
+											<label for="open-mlp">
+													<span class="fa fa-folder-open pr-3" style = "cursor: pointer;"></span>
+												</label>
+									
+											<input id="open-mlp" type="file" style = "display : none;"/>
+
+											<label for="save-mlp">
+													<span class="fa fa-floppy-o pr-3" style = "cursor: pointer;" onclick="SaveMLP()"></span>
+												</label>
+									
 
 								</div>
 							</div>
@@ -321,16 +328,57 @@
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 	<script>
 
+
 					$('#formTest').submit(function(event) {
 							event.preventDefault();
 						
+							TestMLP();
 
-							console.log(eta);
-							console.log(n_p_cc);
-							console.log(fct);
 
-							return False
 					});
+					function TestMLP(){
+
+
+
+						var form_data = new FormData();
+					file = 	document.getElementById('dataTest').files[0];
+					var file_data = $("#dataTest").prop("files")[0];
+					console.log(file_data)
+    			form_data.append('mlpTestFile', file_data);
+
+					console.log(form_data);
+
+						
+							document.getElementById("messageBox").value = "Test en cours ...";
+
+							$.ajax({
+															type: 'POST',
+															url: '/test_mlp',
+															data: form_data,
+															contentType: false, 
+															processData: false,
+
+															success: function (response) {
+																console.log(response)
+																responseDict = JSON.parse(response);
+																status = responseDict["status"]
+																mlp_out = responseDict["mlp_out"]
+																perf =responseDict["perf"]
+																if (status == "Fin du test"){
+																	document.getElementById("messageBox").value = status;
+																	document.getElementById("messageBox").value += "Resultats:\n"+mlp_out;
+																	document.getElementById("messageBox").value += "\n\nPerformance:"+perf;
+
+																	var textarea = document.getElementById('messageBox');
+																	textarea.scrollTop = textarea.scrollHeight;
+
+																}
+															}
+											});
+						};
+
+					
+
 
 
 							var data_entrain;
@@ -397,7 +445,7 @@
 																status = responseDict["status"]
 																eta = responseDict["eta"]
 																if (status == "OK"){
-																	document.getElementById("messageBox").value += "\rEpoche " + epocheCounter + "&#x3B7; = " + eta + " : (" + request_time + "sec)";
+																	document.getElementById("messageBox").value += "\rEpoche " + epocheCounter + "eta = " + eta + " : (" + request_time + "sec)";
 																	document.getElementById("messageBox").value += "\n\tPerformance avec donées de test : " +  testPerf[testPerf.length - 1]
 																	document.getElementById("messageBox").value += "\n\tPerformance avec donées de VC   : " +  vcPerf[vcPerf.length - 1] + "\n"
 																	var textarea = document.getElementById('messageBox');
@@ -411,7 +459,7 @@
 						};
 
 
-						$('form').on('submit', function (event) {
+						$('#formTrain').on('submit', function (event) {
 
 							
 
@@ -440,13 +488,13 @@
 							TrainMLP();
 							});
 
-							function Plot(nb_epoche, performance){
+						function Plot(nb_epoche, performance){
 								console.log(epocheCounter)
 									epocheArray.push(epocheCounter);
 									console.log(testPerf)
 									console.log(epocheArray)
-  								board.create('curve', [epocheArray, testPerf], {dash:2});
-  								board.create('curve', [epocheArray, vcPerf], {dash:2});
+  								board.create('curve', [epocheArray, testPerf], {dash:0, strokeColor:'blue',strokeWidth:2});
+  								board.create('curve', [epocheArray, vcPerf], {dash:0, strokeColor:'red',strokeWidth:2});
 
 								if (epocheCounter < nb_epoche-1){
 									TrainMLP();
@@ -462,6 +510,113 @@
 							}
 
 
+						$('#open-mlp').on('change', function (event) {
+
+								event.preventDefault();
+
+
+								//mlp_file = document.getElementById('open-mlp').value;
+
+								//document.getElementById("messageBox").value = " "
+
+								OpenMLP();
+								});
+
+
+				
+								$('#save-mlp').on('change', function (event) {
+
+									event.preventDefault();
+
+
+									//mlp_file = document.getElementById('open-mlp').value;
+
+									//document.getElementById("messageBox").value = " "
+
+									SaveMLP();
+									});
+
+
+				function OpenMLP(){
+					var form_data = new FormData();
+					file = 	document.getElementById('open-mlp').files[0];
+					var file_data = $("#open-mlp").prop("files")[0];
+    			form_data.append('mlpFile', file_data);
+
+					console.log(form_data);
+
+					document.getElementById("messageBox").value = "Overture de : " + file.name + " ... \n";
+
+					$.ajax({
+															type: 'POST',
+															url: '/open_mlp',
+															data: form_data,
+															contentType: false, 
+															processData: false,
+															cache: false,
+															success: function (response) {
+																	console.log(response)
+																	responseDict = JSON.parse(response);
+																	console.log(responseDict["sortiesPotentielle"])
+																	if(responseDict["status"] === "OK"){
+																	document.getElementById("sortiesDes").value = responseDict["sortiesPotentielle"]
+																	document.getElementById("eta").value = responseDict["eta"]
+																	document.getElementById("db").value = responseDict["db"]
+																	document.getElementById("n_p_cc").value = responseDict["neuronesParCC"]
+																	if(responseDict["fonctionActivation"] === "sinus"){
+																		document.getElementById("fct").value = "Sin"
+																	}
+																	else if(responseDict["fonctionActivation"] === "tanh"){
+																		document.getElementById("fct").value = "Tanh"
+																	}
+																	else if(responseDict["fonctionActivation"] === "sigmoid"){
+																		document.getElementById("fct").value = "Sigmoid"
+																	}
+																	document.getElementById("messageBox").value += "\tComplété";
+															}
+															else{
+																document.getElementById("messageBox").value += "\tERREUR";
+
+															}
+
+																}
+
+															});
+					 return;
+				}
+
+
+				function SaveMLP(){
+
+							var file_name = 0;
+							while(!file_name){
+								file_name = prompt("Veuillez specifier le nom du fichier de sauvgarde ", "mlpOut");
+						};
+				
+
+
+					var form_data = new FormData();
+    			form_data.append('outputFile', file_name);
+
+					console.log(form_data);
+
+					document.getElementById("messageBox").value = "Sauvgard en cours \n";
+
+					$.ajax({
+															type: 'POST',
+															url: '/save_mlp',
+															data: form_data,
+															contentType: false, 
+															processData: false,
+															cache: false,
+															success: function (response) {
+																responseDict = JSON.parse(response);
+																document.getElementById("messageBox").value = responseDict["status"]
+																}
+
+															});
+					 return;
+				}
 
 				
 

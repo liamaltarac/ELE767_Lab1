@@ -21,12 +21,8 @@ class Couche(object):
 
         self.fctAct = fctAct
 
-
         self.tauxApprentissage = eta
-
         
-
-
         if poids == None:
             self.poids = np.random.uniform(-0.1,  0.1, [self.numEntrees,self.numNeurones])
 
