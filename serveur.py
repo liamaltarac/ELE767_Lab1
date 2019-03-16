@@ -7,11 +7,24 @@ import os
 import numpy as np
 
 from ele767_mlp_lib import MLP
+import webbrowser
 
 
-app = Flask(__name__)
-app.mlp = None
 
+
+
+
+def create_app():
+    app = Flask(__name__)
+    app.mlp = None
+    def run_on_start(*args, **argv):
+        url = "http://127.0.0.1:5000"
+        webbrowser.open(url, new = 0)
+        print("opening the webbrowser")
+    run_on_start()
+    return app
+app = create_app()
+ 
 UPLOAD_FOLDER = 'UPLOAD_FOLDER'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -41,7 +54,6 @@ def getES(fichier, sortiesDesire):
     entrees = entrees.astype(float)
     
     return entrees, sorties
-
 
 @app.route('/')
 def test():
