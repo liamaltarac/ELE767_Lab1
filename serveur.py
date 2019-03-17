@@ -18,8 +18,8 @@ def create_app():
     app = Flask(__name__)
     app.mlp = None
     def run_on_start(*args, **argv):
-        url = "http://127.0.0.1:5000"
-        webbrowser.open(url, new = 0)
+        url = "http://localhost:5000"
+        webbrowser.open(url, new = 0, autoraise=True)
         print("opening the webbrowser")
     run_on_start()
     return app
