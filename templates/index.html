@@ -1,0 +1,715 @@
+<html>
+
+<head>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<meta charset="UTF-8">
+
+	<title>
+		Lab 1: MLP {{test}}
+	</title>
+
+
+	<link rel="stylesheet" type="text/css" href="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraph.css" />
+	<script src="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraphcore.js"></script>
+	<script src="https://use.fontawesome.com/83da80e584.js"></script>
+
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+
+
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+	<style>
+		.settings-child {
+
+			width: 100%;
+			box-sizing: border-box;
+		}
+
+		form {
+
+
+			background-color: lavender;
+			padding: 0.7em
+		}
+
+
+
+
+
+		.btn-xl {
+			font-size: 22px;
+			border-radius: 8px;
+		}
+
+		#previous_wave {
+
+			background-color: green;
+			height: 500px;
+
+		}
+
+		.col-md-8 {
+
+			padding-left: 0px;
+
+		}
+	</style>
+
+
+
+</head>
+
+
+<body>
+
+
+
+	<div class="container " style="overflow: hidden;">
+
+		<div id="intro">
+			<h1 class="navbar-text"> Lab 1: MLP <small>par G. Cavero , L. Frija, S. Mohammed</small> </h1>
+		</div>
+		<!--<div id="projectContainer" class="row"> -->
+		<div id="flexBox" class="row d-flex flex-row">
+			<div id="flexBoxLeft" class="col-xs-6 col-md-6 ">
+				<div id="train" class="row">
+					<div id="data1" class="col-xs-12 col-md-12">
+
+						<form id="formTrain" enctype="multipart/form-data">
+
+							<div id = "topRow" class=" form-group row" style="align-items:baseline; ">
+								<div class="col-sm-4">
+									<h3>Entrainer </h3>
+								</div>
+
+
+
+								<div class=" col-sm-8" style="text-align:end">
+
+											<label for="open-mlp">
+													<span class="fa fa-folder-open pr-3" style = "cursor: pointer;" title="Ouvrir un MLP"></span>
+												</label>
+									
+											<input id="open-mlp" type="file" style = "display : none;"/>
+
+											<label for="save-mlp">
+													<span class="fa fa-floppy-o pr-3" style = "cursor: pointer;" onclick="SaveMLP()"  title="Ouvrir un MLP"></span>
+												</label>
+									
+
+								</div>
+							</div>
+
+							<div id = "dataTrainDiv" class=" form-group row">
+								<label for="dataTrain" class="col-sm-3 col-form-label">Data Entraine:</label>
+								<div class="col-sm-9">
+									<input id="dataTrain" name="dataTrain" type=file
+										class="form-control form-control-sm">
+								</div>
+							</div>
+							<div id = dataVCDiv" class=" form-group row">
+								<label for="dataVC" class="col-sm-3 col-form-label">Data VC:</label>
+								<div class="col-sm-9">
+									<input id="dataVC" name="dataVC" type=file class="form-control form-control-sm">
+								</div>
+							</div>
+							<div id = "numericalDataDiv" class=" form-group row" >
+								<div id = "etaDiv" class="col-sm-2  pr-1">
+									<label for="eta">&#x3B7;:</label>
+									<input id="eta" name="eta" type=number class="form-control form-control-sm", step="0.00001">
+								</div>
+
+								<div id = "n_p_ccDiv" class="col-sm-4 pl-1 pr-1">
+									<label for="n_p_cc"> Neurones/CC <a href="#" class="fa fa-question-circle"
+											data-toggle="tooltip" data-placement="top" data-html="true"
+											title="Specifier le nb de neurones par couche cachées. <br> Ex.: 50, 30,100 (separé par une virgule !) ">
+										</a> :</label>
+									<input id="n_p_cc" name="n_p_cc" type=text class="form-control form-control-sm" value={{n_p_cc|default('NONE')}}>
+
+									<script>
+										$(document).ready(function () {
+											$('[data-toggle="tooltip"]').tooltip();
+										});
+									</script>
+
+								</div>
+
+
+								<div id = "fct_actDiv" class="col-sm-5 pl-1 ">
+									<label for="fct">Fct d'activation:</label>
+									<select id="fct" name="fct" class="form-control form-control-sm" >
+										<option value="Sigmoid">Sigmoid</option>
+										<option value="Tanh">Tanh</option>
+										<option value="Sinus">Sinus</option>
+										<option value="RELU">RELU</option>
+										<option value="LeakyRELU">LeakyRELU</option>
+
+									</select>
+									<script>
+										document.getElementById("fct").value = "{{fct|default('NONE')}}"
+										</script>
+								</div>
+
+								<div id = "dbDiv" class="col-sm-4 pr-1 pt-3 ">
+									<label for="db">Base de donnée:</label>
+									<select id="db" name="db" class="form-control form-control-sm">
+										<option value="40">40</option>
+										<option value="50">50</option>
+										<option value="60">60</option>
+									</select>
+									<script>
+											document.getElementById("db").value = "{{db|default('NONE')}}"
+											</script>
+								</div>
+
+								<div id="numEpocheDiv"" class="col-sm-3 pr-1 pt-3 ">
+									<label for="nb_epoche">Nb d'époches:</label>
+									<input id="nb_epoche" name="nb_epoche" type=number value = {{nb_epoche|default('NONE')}}
+										class="form-control form-control-sm">
+
+								</div>
+								<div id="numEpocheDiv"" class="col-sm-4 pr-1 pt-3 ">
+								<label for="sorties_potentiels">Sorties Potentiels:</label>
+								<button id = "sorties_potentiels" type="button" class="btn-sm btn-info form-control form-control-sm" data-toggle="modal" data-target="#myModal">Modifier</button>
+
+									<!-- Modal -->
+									<div class="modal fade" id="myModal" role="dialog">
+										<div class="modal-dialog">
+										
+											<!-- Modal content-->
+											<div class="modal-content">
+												<div class="modal-header">
+														<h5 class="modal-title">Sorties Potentiels</h5>
+
+												</div>
+												<div class="modal-body">
+													<textarea id = "sortiesDes" class="col-sm-12" > {{sorties_potentielles|default('NONE')}}</textarea>
+												</div>
+												<div class="modal-footer">
+													<button type="button" class="btn btn-default" data-dismiss="modal">Sauvegarder</button>
+												</div>
+											</div>
+											</div>
+										</div>
+									</div>
+							</div>
+
+							<div class="form-row align-items-center">
+							<div class="col-auto">
+									<div class="form-check mb-2 pr-2 " style = " border-right: 1px dashed #333;">
+
+										<input class="form-check-input" type="checkbox" id="etaAdaptif" name="etaAdaptif">
+										<label class="form-check-label" for="etaAdaptif" >
+												&#x3B7; adaptif 
+											</label>
+											<script>
+													document.getElementById("eta").value = "{{eta|default('NONE')}}"
+													</script>
+									</div>
+								</div>
+								<div class="col-auto">
+										<div class="form-check mb-2 pr-2 " style = " border-right: 1px dashed #333;">
+											<input class="form-check-input" type="checkbox" id="ajoutBruit" name = "ajoutBruit">
+											<label class="form-check-label" for="ajoutBruit" >
+													Ajout de bruit
+												</label>
+										</div>
+									</div>
+								<div class="col-auto " style="text-align:end">
+										<button id = "trainBtn" type="submit" class="btn btn-primary ">Entraine</button>
+								</div>
+								</div>
+
+
+
+									<!--<button type="submit" class="btn btn btn-danger btn-xl">Stop</button>-->
+
+						</form>
+					</div>
+				</div>
+
+				<div id="test" class="row">
+					<div id="data" class="col-xs-12 col-md-12">
+
+						<form id="formTest"  method="POST">
+
+							<h3>Tester </h3>
+							<div class=" form-group row">
+								<label for="dataTest" class="col-sm-7 col-form-label">Data à tester:</label>
+								<div class="col-sm-12">
+									<input id="dataTest" name="dataTest" type=file class="form-control form-control-sm">
+								</div>
+							</div>
+							<div class="col-xs-12" style="text-align:end">
+								<button type="submit" class="btn btn-primary ">Test</button>
+							</div>
+						</form>
+					</div>
+
+				</div>
+			</div>
+
+			<div id="flexBoxRight" class="col-xs-6 col-md-6">
+				<div id="jxgbox" class="jxgbox col-xs-12   " style="height: 100px"> </div> 
+				<div id="messageBoxArea" class="col-xs-12" style="height: 20%">
+						<textarea id = "messageBox"  class="col-xs-12 col-md-12 " style="height: 100%; resize: none" value = {{error}}>
+									</textarea>
+									<script>
+									document.getElementById("messageBox").disabled = true;
+									</script>
+
+				</div>
+
+				<script>
+					$(document).ready(function(){
+						var $form = $('form');
+
+						var trainElementPaddingB = $form.css('margin-bottom').replace(/[^-\d\.]/g, '');
+						console.log(trainElementPaddingB);
+
+						trainHeight = $('#train').height();
+						jxgboxSize = $('#jxgbox').height();
+						console.log(trainHeight - trainElementPaddingB);
+						
+						$("#jxgbox").height(trainHeight - trainElementPaddingB);
+						$("#jxgbox").css('margin-bottom', trainElementPaddingB);
+
+						var $form = $('form');
+
+						var testElementPaddingB = $form.css('margin-bottom').replace(/[^-\d\.]/g, '');
+						console.log(testElementPaddingB);
+
+						testHeight = $('#test').height();
+						console.log(testHeight - trainElementPaddingB);
+						
+						$("#messageBoxArea").height(testHeight - testElementPaddingB);
+
+
+					});
+
+				</script>
+			</div>
+
+
+
+		</div>
+
+		<!--</div>-->
+
+
+
+	</div>
+
+
+
+
+
+
+
+	<!--	<div id = "results" class = "col-xs-12 col-md-7 " style="height: auto;">
+			<div id="graph" class="col-xs-12 col-md-12" style="height: 100%; " >
+				<div class="row" style="height: 80%;">
+					<div id="jxgbox" class="jxgbox col-xs-12 col-md-12" style="height: 80%; " ></div>
+				</div>
+			</div>
+			<div id="output" class="col-xs-12 col-md-12" style="height:100%; " >	
+				<div class="row " style="height: 100%;">
+					<textarea style="height: 100%; width: 100%; resize: none;">
+					</textarea>	
+				</div>
+			</div>
+	</div>		
+
+
+
+		<div id = "output" class="col-xs-12 col-md-7" style="height: 100%; background-color: beige;" >
+					<div class="row col-xs-12 col-md-12" style="height: 60%; background-color: red;">
+						<div id="jxgbox" class="jxgbox col-xs-12 col-md-12" style="height: 100%; " ></div>
+					</div>
+					<div class="row col-xs-12 col-md-12" style="height: 40%;">
+						<textarea id="messageout" class="col-xs-12 col-md-12" style="height: 100%; " ></textarea>
+					</div>
+			
+		</div>
+
+-->
+
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script>
+
+			//Si l'utilisateur click sur le boutton TEST
+					$('#formTest').submit(function(event) {
+							event.preventDefault();
+						
+							TestMLP();
+
+
+					});
+					function TestMLP(){
+
+
+
+						var form_data = new FormData();
+					file = 	document.getElementById('dataTest').files[0];
+					var file_data = $("#dataTest").prop("files")[0];
+					console.log(file_data)
+    			form_data.append('mlpTestFile', file_data);
+
+					console.log(form_data);
+
+						
+							document.getElementById("messageBox").value = "Test en cours ...";
+
+							$.ajax({
+															type: 'POST',
+															url: '/test_mlp',
+															data: form_data,
+															contentType: false, 
+															processData: false,
+
+															success: function (response) {
+																console.log(response)
+																responseDict = JSON.parse(response);
+																status = responseDict["status"]
+																mlp_out = responseDict["mlp_out"]
+																perf =responseDict["perf"]
+																if (status == "Fin du test"){
+																	document.getElementById("messageBox").value = status;
+																	document.getElementById("messageBox").value += "Resultats:\n"+mlp_out;
+																	document.getElementById("messageBox").value += "\n\nPerformance:"+perf;
+
+																	var textarea = document.getElementById('messageBox');
+																	textarea.scrollTop = textarea.scrollHeight;
+
+																}
+															}
+											});
+						};
+
+					
+
+
+
+							var data_entrain;
+							var data_vc ;
+							var eta;
+							var n_p_cc;
+							var fct ;
+							var db;
+							var nb_epoche;
+							var s_des ;
+
+							var board;
+
+							var testPerf = [];
+							var vcPerf = []
+							var epocheArray = [];
+						
+						var ajoutBruit;
+					var epocheCounter = 0;
+
+					function TrainMLP(){
+
+
+							var form = $('#formTrain')[0];
+							console.log(form);
+						
+							var formData = new FormData(form);
+
+							formData.append("sortiesDes",s_des);
+
+							formData.delete("ajoutBruit");
+							if(document.getElementById("ajoutBruit").checked){
+								formData.append("ajoutBruit","True");
+							}
+							else{
+								formData.append("ajoutBruit","False");
+							}
+
+
+							formData.delete("etaAdaptif");
+							if(document.getElementById("etaAdaptif").checked){
+								formData.append("etaAdaptif","True");
+							}
+							else{
+								formData.append("etaAdaptif","False");
+							}
+
+							var start_time = new Date().getTime();
+
+
+										$.ajax({
+															type: 'POST',
+															url: '/start_training',
+															data: formData,
+															contentType: false, 
+															processData: false,
+
+															success: function (response) {
+																console.log(response)
+																var request_time = (new Date().getTime() - start_time) / 1000;
+																responseDict = JSON.parse(response);
+																testPerf.push(parseFloat(responseDict["trainDataPerf"]));
+																vcPerf.push(parseFloat(responseDict["vcDataPerf"]));
+																status = responseDict["status"]
+																eta = responseDict["eta"]
+																if (status == "OK"){
+																	document.getElementById("messageBox").value += "\rEpoche " + epocheCounter + "eta = " + eta + " : (" + request_time + "sec)";
+																	document.getElementById("messageBox").value += "\n\tPerformance avec donées de test : " +  testPerf[testPerf.length - 1]
+																	document.getElementById("messageBox").value += "\n\tPerformance avec donées de VC   : " +  vcPerf[vcPerf.length - 1] + "\n"
+																	var textarea = document.getElementById('messageBox');
+																	textarea.scrollTop = textarea.scrollHeight;
+
+																}
+																if (status == "FAIL"){
+																	document.getElementById("messageBox").value += "\n\tÉchoué"
+																	var textarea = document.getElementById('messageBox');
+																	textarea.scrollTop = textarea.scrollHeight;
+																	//document.getElementById("trainBtn").disabled = false;
+																	epocheCounter = nb_epoche;
+																}
+
+
+																Plot(nb_epoche);
+															}
+											});
+						};
+
+
+						$('#formTrain').on('submit', function (event) {
+
+							
+
+							event.preventDefault();
+
+							document.getElementById("trainBtn").disabled = true;
+
+							data_entrain = document.getElementById('dataTrain').value;
+							data_vc = document.getElementById('dataVC').value;
+							eta= document.getElementById('eta').value;
+							n_p_cc =  document.getElementById('n_p_cc').value;
+							fct = document.getElementById('fct').value;
+							db = document.getElementById('db').value;
+							nb_epoche = document.getElementById('nb_epoche').value;
+							s_des = document.getElementById("sortiesDes").value;
+							addNoise = document.getElementById("ajoutBruit").value;
+
+
+							document.getElementById("messageBox").value = " "
+							document.getElementById("messageBox").value = "Entrainement en cours ...";
+							
+						
+							board = JXG.JSXGraph.initBoard('jxgbox', {boundingbox:  [-1, 1.1, parseInt(nb_epoche), -0.1], 
+																												axis:true, grid:true, showNavigation:false , showCopyright:false });
+
+							TrainMLP();
+							});
+
+						function Plot(nb_epoche, performance){
+								console.log(epocheCounter)
+									epocheArray.push(epocheCounter);
+									console.log(testPerf)
+									console.log(epocheArray)
+  								board.create('curve', [epocheArray, testPerf], {dash:0, strokeColor:'blue',strokeWidth:2});
+  								board.create('curve', [epocheArray, vcPerf], {dash:0, strokeColor:'red',strokeWidth:2});
+
+								if (epocheCounter < nb_epoche-1){
+									TrainMLP();
+									epocheCounter++;
+
+								}
+								else{
+									epocheCounter = 0;
+									testPerf = [];
+									vcPerf = [];
+									document.getElementById("trainBtn").disabled = false;
+								}
+							}
+
+
+						$('#open-mlp').on('change', function (event) {
+
+								event.preventDefault();
+
+
+								//mlp_file = document.getElementById('open-mlp').value;
+
+								//document.getElementById("messageBox").value = " "
+
+								OpenMLP();
+								});
+
+
+				
+								$('#save-mlp').on('change', function (event) {
+
+									event.preventDefault();
+
+
+									//mlp_file = document.getElementById('open-mlp').value;
+
+									//document.getElementById("messageBox").value = " "
+
+									SaveMLP();
+									});
+
+
+				function OpenMLP(){
+					var form_data = new FormData();
+					file = 	document.getElementById('open-mlp').files[0];
+					var file_data = $("#open-mlp").prop("files")[0];
+    			form_data.append('mlpFile', file_data);
+
+					console.log(form_data);
+
+					document.getElementById("messageBox").value = "Overture de : " + file.name + " ... \n";
+
+					$.ajax({
+															type: 'POST',
+															url: '/open_mlp',
+															data: form_data,
+															contentType: false, 
+															processData: false,
+															cache: false,
+															success: function (response) {
+																	console.log(response)
+																	responseDict = JSON.parse(response);
+																	console.log(responseDict["sortiesPotentielle"])
+																	if(responseDict["status"] === "OK"){
+																	document.getElementById("sortiesDes").value = responseDict["sortiesPotentielle"]
+																	document.getElementById("eta").value = responseDict["eta"]
+																	document.getElementById("db").value = responseDict["db"]
+																	document.getElementById("n_p_cc").value = responseDict["neuronesParCC"]
+																	if(responseDict["fonctionActivation"] === "sinus"){
+																		document.getElementById("fct").value = "Sin"
+																	}
+																	else if(responseDict["fonctionActivation"] === "tanh"){
+																		document.getElementById("fct").value = "Tanh"
+																	}
+																	else if(responseDict["fonctionActivation"] === "sigmoid"){
+																		document.getElementById("fct").value = "Sigmoid"
+																	}
+																	document.getElementById("messageBox").value += "\tComplété";
+															}
+															else{
+																document.getElementById("messageBox").value += "\tERREUR";
+
+															}
+
+																}
+
+															});
+					 return;
+				}
+
+
+				function SaveMLP(){
+
+							var file_name = 0;
+							while(!file_name){
+								file_name = prompt("Veuillez specifier le nom du fichier de sauvgarde ", "mlpOut");
+						};
+				
+
+
+					var form_data = new FormData();
+    			form_data.append('outputFile', file_name);
+
+					console.log(form_data);
+
+					document.getElementById("messageBox").value = "Sauvgard en cours \n";
+
+					$.ajax({
+															type: 'POST',
+															url: '/save_mlp',
+															data: form_data,
+															contentType: false, 
+															processData: false,
+															cache: false,
+															success: function (response) {
+																responseDict = JSON.parse(response);
+																document.getElementById("messageBox").value = responseDict["status"]
+																}
+
+															});
+					 return;
+				}
+
+				
+
+      /*  $('form').submit(function(event) {
+                event.preventDefault();
+                $.ajax({
+                        type: 'POST',
+                        url: '/test.php',
+                        data: $(this).serialize(),
+                        success: function (response) {
+                                console.log(response);
+								//alert("Sent");
+								}
+                });
+        
+				//alert("ok");
+				var waveform = document.getElementById('waveform').value;
+					var frequency = document.getElementById('frequency').value; 
+				var period = 1/frequency; //Calculate how many horizontal squares for 1 period
+				var amplitude = document.getElementById('amplitude').value; 
+				var offset = document.getElementById('offset').value; 
+				
+				
+				if(frequency.length == 0)
+					frequency.value = 0.01;
+				if(amplitude.length == 0)
+					amplitude.value = 0.01;
+				if(offset.length == 0)
+					offset = 0;
+					
+				offset = parseFloat(offset);
+				
+				var topVoltage = Math.ceil((amplitude/2)+offset);
+				var bottomVoltage = offset+Math.ceil(amplitude/2)*-1;
+				var board = JXG.JSXGraph.initBoard('graph', {boundingbox: [0, topVoltage, period, bottomVoltage], axis:true, grid:true, showNavigation:false});
+				
+				if(frequency.length == 0)
+					frequency.value = 0.01;
+				if(amplitude.length == 0)
+					amplitude.value = 0.01;
+				if(offset.length == 0)
+					offset.value = 0;
+				
+				//alert(waveform);
+		
+				if(waveform == "Sine"){
+					
+					board.create('functiongraph', [function(x){return (amplitude/2)*Math.sin(2*Math.PI*frequency*x)+offset;}]);
+				
+				}
+				
+				if(waveform == "Square"){
+					
+					board.create('stepfunction', [[0,period/2, period], [offset+(amplitude/2),offset+(-1*amplitude/2), offset+(amplitude/2)]], {strokeColor:'blue'});
+
+				
+				}
+				
+
+		
+		});
+ */
+		
+
+
+
+	</script>
+
+</body>
+
+
+</html>
