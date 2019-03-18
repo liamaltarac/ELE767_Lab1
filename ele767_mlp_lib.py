@@ -24,7 +24,7 @@ class MLP(object):
     
     def __init__(self, numEntrees = None, numSorties = None, fonctionActivation = "sigmoid", 
                 neuronesParCC = [20], eta = 0.1, sortiePotentielle = None, 
-                epoche = 1, tempsMax = None, etaAdaptif = False, perf_VC = 0.75, 
+                epoche = 1, etaAdaptif = False, perf_VC = 0.75, 
                 VCin = None, VCout = None, fichier_mlp = None):   
 
         self.numEntrees = numEntrees
@@ -41,8 +41,7 @@ class MLP(object):
         self.epoche = epoche
         self.performance  = np.array([])
         self.performanceVC = np.array([])
-        self.tempsMax = tempsMax     #Temps max specifie le temps maximale alloue a l'entrainement du MLP.
-                                     #Si ceci est None, le MLP peut s'entrainer sans cesse. 
+
         self.etaAdaptif = etaAdaptif   
 
 
@@ -57,6 +56,7 @@ class MLP(object):
         self.VCout = VCout
         
         self.totalNumEpoche = 0
+
 
         if fichier_mlp is not None:
             seuilsArray = []
@@ -83,8 +83,7 @@ class MLP(object):
                         self.numSorties = int(value)
                     elif key == "sortiespotentielles": 
                         self.sortiesPotentielle = eval(value)
-
-        print("starting layer setup")
+        #creation des couches cachees 
         for i in range(self.numCC):
             print("numEntrees ", self.numEntrees)
             coucheCachee = Couche(numEntrees = numEntrees,
@@ -93,6 +92,7 @@ class MLP(object):
                         fctAct=fonctionActivation)
             numEntrees = self.neuronesParCC[i]
             self.couches.append(coucheCachee)
+        #creation de la couche sortie
         print("Couche Sortie")
         coucheSortie = Couche(numEntrees = self.neuronesParCC[-1],
                                 numNeurones = self.numSorties,
@@ -131,22 +131,10 @@ class MLP(object):
 
         print(self.sortiesPotentielle)
        
-        # for i in range(self.numCC):
-        #     print("CC ", i)        
-        #     print("Nb neurones ", self.couches[i].numNeurones)
-        #     print("Nb entrees ", self.couches[i].numEntrees)
-        #     print("Nb entrees par neurone ", self.couches[i].numEntrees)
-        #     print("Nb poids par neurone ", (self.couches[i].getPoids()))
-
-        # print("Csortie ")
-        # print("Nb neurones ", (self.couches[-1].numNeurones))
-        # print("Nb entrees ", self.couches[-1].numEntrees)
-        # print("Nb entrees par neurone ", self.couches[-1].numEntrees)
-        # print("Nb poids par neurone ", (self.couches[-1].getPoids()))
     def entraine(self, entree, sortieDesire, ajoutDeDonnees = False, varierEta = False):
         #Premieremnt, nous allons tester si les tableaux entree et sortieDesire contienent des sous tableaux
-
-        if type(entree[0]) is not list and type(entree[0]) is not np.ndarray:
+        #sinon, on les force dans un tableau
+        if type(entree[0]) is not list and type(entree[0]) is not np.ndarray: 
             entree = [entree]
             tailleEntree = len(entree)
 
@@ -172,8 +160,6 @@ class MLP(object):
         for numEpoche , epoche in enumerate(range(self.epoche)): 
             self.performance = np.append(self.performance, [0])
             print("epoche " ,self.totalNumEpoche)
-
-            #print("ALL OUT: ", sortieDesire)
             entree = permanantEntree 
             
             sortieDesire = permanantSortieDesire 
@@ -186,58 +172,34 @@ class MLP(object):
                 _sortieDesire = sortieDesire[index]
                 entree = np.delete(entree, index,0)
                 sortieDesire = np.delete(sortieDesire,index,0)
-                #print("Sortie desirees", sortieDesire)
-                #print("Input Data ", i+1)
-                #Les neurones de la premiere couche cache vont prendre les entree du MLP comme entrees 
-                #Etape 1 : Activation des Neurons
-                #print("Activation de neurones")
+                
+                #Etape 1: Activation
                 x = _entree
-                #print("Etape 1 : Activation")
                 for (j,couche) in enumerate(self.couches):
-                    #print("Couche ", j)
                     couche.setEntrees(x)
                     couche.activerNeurons()
-                    #print("Couche num neurones ", couche.numEntrees )
                     x = np.array(couche.sorties)
-                    #print(x)
-                    #print(couche.getPoids())
-                #print(len(self.softmax(self.couches[-1].getSortie())))
-                #print(_sortieDesire)
+
+                #Si apres l'activation la sortie du MLP = sortie desiree, on skip l'entrainement
                 if (self.softmax(self.couches[-1].getSortie()) == _sortieDesire).all():
                     self.performance[self.totalNumEpoche] += 1
                     print("performance ", self.performance)
                     continue
-                #if self.performance[numEpoche] >= 7 :
-                #    return
 
+                #Etape 2: Signale Erreur
                 self.couches[-1].setSortiesDesire(_sortieDesire)
-                #print("smax: ",self.softmax(self.couches[-1].getSortie()))
-                #print("sort des: ",sortieDesire[i])
-                #print(self.couches[-1].getSortie())
-                #Etape 2 : Calcule des signaux d'erreurs commencant par la couche de sortie qui n'a pas de prochaine couche
-                #print("Sig Erreur")
                 self.couches[-1].calculSignauxErreur()
                 for j in reversed(range(len(self.couches[0:-1]))):
                     self.couches[j].calculSignauxErreur(prochaineCouche = self.couches[j+1])  
-                    #print("j", j)
 
-                #Etape 3: Correction et Actualisation
-                #print("Correction et act couche ",i )
+                #Etapes 3 et 4 : correction et actualisation
                 for couche in self.couches:
                     couche.correction()
                     couche.actualisation()
 
-
-                
-
-                #for (n,couche) in enumerate(self.couches):
-                    #pass
-                    #print("Couche ", n)
-                '''for (m,neurone) in enumerate(couche.neurones):
-                        pass'''
-                         #print("Neurone " + str(m) + " : " + str(neurone.getPoids()))
-
             #Fin de l'epoche
+
+            #Calucl de la performance avec les donnees de test et avec la validation croisee.
             self.performance[self.totalNumEpoche] = self.performance[self.totalNumEpoche]/tailleEntree
             if self.VCin is not None and self.VCout is not None:
                 perfVC = self.test(self.VCin, self.VCout)
@@ -249,13 +211,6 @@ class MLP(object):
 
         print(self.performance[-1])
 
-        '''if self.VCin is not None and self.VCout is not None: #On check si notre classe a des donees 
-                                                             #de validation croise. Ceci nous indique si on est en mesure de 
-                                                             #faire une apprentisage incrementale.
-            _, self.perfVC = self.test(self.VCin , self.VCout)
-            if self.adaptive:
-                if self.perf_VC < self.perf_VC_desire:
-                    self.ajouteCoucheCachee([self.couches[0].numNeurones])'''
 
     def setPoids(self, couche, poids):
 
@@ -349,6 +304,13 @@ class MLP(object):
 
 
     def test(self, entrees, sortieDesire = None):
+
+        '''
+        test(entrees, sortieDesire = None)
+
+        Tester le MLP et predire le resultat d'une entree
+
+        '''
         #Les neurones de la premiere couche cache vont prendre les entree du MLP comme entrees 
         #Etape 1 : Activation des Neurons
         MLP_out = np.empty((0,self.numSorties), int)
@@ -402,6 +364,7 @@ class MLP(object):
         return softmax_bin
     
     def ajoutDeBruit(self, entree):
+        #http://mms.etsmtl.ca/ELE778/Synthese/8-OptimizationforTrainingDeepModels.pdf
         print("Ajout de bruit")
         noisyArray =  np.random.uniform(0.8,  1.2, [len(entree), entree[0].size])
         print("Noisy Array generated")

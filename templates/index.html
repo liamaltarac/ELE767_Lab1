@@ -15,6 +15,7 @@
 	<script src="http://jsxgraph.uni-bayreuth.de/distrib/jsxgraphcore.js"></script>
 	<script src="https://use.fontawesome.com/83da80e584.js"></script>
 
+
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
@@ -93,13 +94,13 @@
 								<div class=" col-sm-8" style="text-align:end">
 
 											<label for="open-mlp">
-													<span class="fa fa-folder-open pr-3" style = "cursor: pointer;"></span>
+													<span class="fa fa-folder-open pr-3" style = "cursor: pointer;" title="Ouvrir un MLP"></span>
 												</label>
 									
 											<input id="open-mlp" type="file" style = "display : none;"/>
 
 											<label for="save-mlp">
-													<span class="fa fa-floppy-o pr-3" style = "cursor: pointer;" onclick="SaveMLP()"></span>
+													<span class="fa fa-floppy-o pr-3" style = "cursor: pointer;" onclick="SaveMLP()"  title="Ouvrir un MLP"></span>
 												</label>
 									
 
@@ -124,12 +125,13 @@
 									<label for="eta">&#x3B7;:</label>
 									<input id="eta" name="eta" type=number class="form-control form-control-sm", step="0.00001">
 								</div>
+
 								<div id = "n_p_ccDiv" class="col-sm-4 pl-1 pr-1">
 									<label for="n_p_cc"> Neurones/CC <a href="#" class="fa fa-question-circle"
 											data-toggle="tooltip" data-placement="top" data-html="true"
 											title="Specifier le nb de neurones par couche cachées. <br> Ex.: 50, 30,100 (separé par une virgule !) ">
 										</a> :</label>
-									<input id="n_p_cc" name="n_p_cc" type=text class="form-control form-control-sm">
+									<input id="n_p_cc" name="n_p_cc" type=text class="form-control form-control-sm" value={{n_p_cc|default('NONE')}}>
 
 									<script>
 										$(document).ready(function () {
@@ -142,12 +144,17 @@
 
 								<div id = "fct_actDiv" class="col-sm-5 pl-1 ">
 									<label for="fct">Fct d'activation:</label>
-									<select id="fct" name="fct" class="form-control form-control-sm">
+									<select id="fct" name="fct" class="form-control form-control-sm" >
 										<option value="Sigmoid">Sigmoid</option>
 										<option value="Tanh">Tanh</option>
-										<option value="Sinus">Sin</option>
+										<option value="Sinus">Sinus</option>
+										<option value="RELU">RELU</option>
+										<option value="LeakyRELU">LeakyRELU</option>
 
 									</select>
+									<script>
+										document.getElementById("fct").value = "{{fct|default('NONE')}}"
+										</script>
 								</div>
 
 								<div id = "dbDiv" class="col-sm-4 pr-1 pt-3 ">
@@ -157,11 +164,14 @@
 										<option value="50">50</option>
 										<option value="60">60</option>
 									</select>
+									<script>
+											document.getElementById("db").value = "{{db|default('NONE')}}"
+											</script>
 								</div>
 
 								<div id="numEpocheDiv"" class="col-sm-3 pr-1 pt-3 ">
 									<label for="nb_epoche">Nb d'époches:</label>
-									<input id="nb_epoche" name="nb_epoche" type=number
+									<input id="nb_epoche" name="nb_epoche" type=number value = {{nb_epoche|default('NONE')}}
 										class="form-control form-control-sm">
 
 								</div>
@@ -180,7 +190,7 @@
 
 												</div>
 												<div class="modal-body">
-													<textarea id = "sortiesDes" class="col-sm-12"> </textarea>
+													<textarea id = "sortiesDes" class="col-sm-12" > {{sorties_potentielles|default('NONE')}}</textarea>
 												</div>
 												<div class="modal-footer">
 													<button type="button" class="btn btn-default" data-dismiss="modal">Sauvegarder</button>
@@ -199,6 +209,9 @@
 										<label class="form-check-label" for="etaAdaptif" >
 												&#x3B7; adaptif 
 											</label>
+											<script>
+													document.getElementById("eta").value = "{{eta|default('NONE')}}"
+													</script>
 									</div>
 								</div>
 								<div class="col-auto">
@@ -246,8 +259,11 @@
 			<div id="flexBoxRight" class="col-xs-6 col-md-6">
 				<div id="jxgbox" class="jxgbox col-xs-12   " style="height: 100px"> </div> 
 				<div id="messageBoxArea" class="col-xs-12" style="height: 20%">
-						<textarea id = "messageBox"  class="col-xs-12 col-md-12 " style="height: 100%; resize: none">
+						<textarea id = "messageBox"  class="col-xs-12 col-md-12 " style="height: 100%; resize: none" value = {{error}}>
 									</textarea>
+									<script>
+									document.getElementById("messageBox").disabled = true;
+									</script>
 
 				</div>
 
@@ -328,7 +344,7 @@
 <script src="http://code.jquery.com/jquery-latest.js"></script>
 	<script>
 
-
+			//Si l'utilisateur click sur le boutton TEST
 					$('#formTest').submit(function(event) {
 							event.preventDefault();
 						
@@ -452,6 +468,14 @@
 																	textarea.scrollTop = textarea.scrollHeight;
 
 																}
+																if (status == "FAIL"){
+																	document.getElementById("messageBox").value += "\n\tÉchoué"
+																	var textarea = document.getElementById('messageBox');
+																	textarea.scrollTop = textarea.scrollHeight;
+																	//document.getElementById("trainBtn").disabled = false;
+																	epocheCounter = nb_epoche;
+																}
+
 
 																Plot(nb_epoche);
 															}

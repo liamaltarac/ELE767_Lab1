@@ -1,6 +1,18 @@
 from mlp_math import FonctionActivation
 import numpy as np
 #from profilestats import profile
+
+#######################################################
+##  Fichier : ccouhe.py
+##  Auteurs : G. Cavero , L. Frija, S. Mohammed
+##  Date de creation : 25 Fev 2019          
+##  Description : Ce fichier contient toutes les
+##                fonctions qui sont perminant aux couches
+##                Tel que : activation, calculSignauxErreur, 
+##               actualisation, correction
+##
+#######################################################
+
 class Couche(object):
 
     def __init__(self, numEntrees, numNeurones, coucheSortie = False, eta = 0.1,
@@ -22,7 +34,7 @@ class Couche(object):
         self.fctAct = fctAct
 
         self.tauxApprentissage = eta
-        
+
         if poids == None:
             self.poids = np.random.uniform(-0.1,  0.1, [self.numEntrees,self.numNeurones])
 
@@ -44,70 +56,39 @@ class Couche(object):
 
 
     def calculSorties(self):
+        #Forward propagation
+
         i = np.zeros(self.numNeurones)
-        #print("p ", self.poids)
-        #("num neuron", self.numNeurones)
-        #print("poids de cettec couche", self.poids)
 
         for neurone in range(self.numNeurones):
             if self.numNeurones > 1:
-                #print("p", self.poids)
-                #print("neurone ",neurone)
+
                 poid = self.poids[:, neurone]
             else:
-                #print("onluy one layer")
                 poid = self.poids
-                #print("this poid is", poid) 
             i[neurone] =  np.sum(self.entrees * poid)              
-        #print(self.seuils)
-        #print("i pre", self.i)
+
         i += self.seuils
-        #print("i calced", self.i)
         self.sorties = FonctionActivation(i, self.fctAct)
 
     def activerNeurons(self):
+        #Fonction d'activation
         self.i = np.zeros(self.numNeurones)
-        #print("p ", self.poids)
-        #("num neuron", self.numNeurones)
-        #print("poids de cettec couche", self.poids)
 
         for neurone in range(self.numNeurones):
             if self.numNeurones > 1:
-                #print("p", self.poids)
-                #print("neurone ",neurone)
                 poid = self.poids[:, neurone]
             else:
-                #print("onluy one layer")
                 poid = self.poids
-                #print("this poid is", poid) 
             self.i[neurone] =  np.sum(self.entrees * poid)              
-            '''for num_entree, entree in enumerate(self.entrees):
-                #print(num_entree)
-
-                    
-                else:
-                    #print("onluy one layer")
-                    poid = self.poids[num_entree]
-                    #print("this poid is", poid)
-                self.i[neurone] += (entree * poid )
-                #print(entree ,poid)'''
-        #print(self.seuils)
-        #print("i pre", self.i)
         self.i += self.seuils
-        #print("i calced", self.i)
-
-
-
         self.sorties = FonctionActivation(self.i, self.fctAct)
-        #print("activation out ", self.sorties)
-        #return self.sorties
 
-    def calculSignauxErreur(self, prochaineCouche = None):
+
+    def calculSignauxErreur(self, prochaineCouche = None): #La prochaine couche doit etre specifie pour connaitre ses poids
         
         if self.coucheSortie:
-            #print("unite sortie")
             self.delta = (self.sortiesDesire - self.sorties)*FonctionActivation(self.i, self.fctAct, derive = True)
-            #("output layer , num neurones ", self.numNeurones)
             return
        
         self.delta = np.zeros(self.numNeurones)
@@ -117,67 +98,23 @@ class Couche(object):
             for neuroneNextCouche in range(prochaineCouche.numNeurones):  #Chaque neurone contien un delta
                 if(prochaineCouche.numNeurones <= 1):
                     poidsNextCouche = prochaineCouche.getPoids()[neurone]
-                    #print("Here 11")
                 else:
-                    #print("poids", prochaineCouche.getPoids())
                     poidsNextCouche = prochaineCouche.getPoids()[neurone,neuroneNextCouche]
-                    #print(prochaineCouche.delta)
 
                 somme += poidsNextCouche * prochaineCouche.delta[neuroneNextCouche]
             self.delta[neurone] = somme * FonctionActivation(self.i[neurone], self.fctAct, derive = True)
-
-
-        '''if self.coucheSortie:
-            for neurone in self.neurones:
-                neurone.calculSignalErreur()
-            return
-        for num, neurone in enumerate(self.neurones):
-
-            try:
-                listePoids = [n.getPoids(numEntree = num) for n in prochaineCouche.neurones]
-                listeDeltas = [n.delta for n in prochaineCouche.neurones]
-                neurone.calculSignalErreur(poidsNext = listePoids, deltasNext = listeDeltas)
-            except:
-                print("nb neurones", len(self.neurones))
-                print("nb neurones prochaine couche", len(prochaineCouche.neurones))
-
-                raise("")'''
 
     def correction(self):
 
         self.deltaPoids =  np.empty((0, self.numEntrees), float)
 
         if self.numNeurones <= 1:
-            #print("delat size", self.deltaPoids)
             self.deltaPoids = self.tauxApprentissage * self.delta * self.entrees
         else:
-            #print("delat calculee", self.tauxApprentissage * self.delta * self.entrees[entree])
-            #val = self.tauxApprentissage * self.delta * self.entrees
             self.deltaPoids = np.tile(self.entrees, (self.numNeurones,1)).T * self.delta * self.tauxApprentissage
-            #self.deltaPoids = np.append(self.deltaPoids , [self.tauxApprentissage * self.delta * self.entrees], axis=0)
-        #print("Shape poids : ", self.poids.shape)
-        '''for entree in range(self.numEntrees):
-            #try:
-            if self.numNeurones <= 1:
-                #print("delat size", self.deltaPoids)
-                self.deltaPoids[entree] = self.tauxApprentissage * self.delta * self.entrees[entree]
-                
-            else:
-                #print("delat calculee", self.tauxApprentissage * self.delta * self.entrees[entree])
-                self.deltaPoids[entree:,] = self.tauxApprentissage * self.delta * self.entrees[entree]
-            #except Exception as e:
-                #print(e)
-                #print(len(self.__entrees))
-                #print(self.tauxApprentissage * self.delta * self.__entrees[i]) '''
 
-        '''for neurone in self.neurones:
-            neurone.correction()'''
 
-    #@profile(print_stats = 10)   
     def actualisation(self):
-        '''for neurone in self.neurones:
-            neurone.actualisation()   '''
-        #print("delta poids ", self.deltaPoids)
         self.poids = self.poids + self.deltaPoids 
 
 
